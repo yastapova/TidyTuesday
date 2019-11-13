@@ -2,8 +2,10 @@ cran_code <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/
 
 library(tidyverse)
 
+# group by language
 by_lang = group_by(cran_code, language)
 
+# summarize data for each language
 pkg_summary = summarise(by_lang, 
   pkgs = n(), 
   code = sum(code, na.rm=TRUE),
@@ -11,18 +13,23 @@ pkg_summary = summarise(by_lang,
   comments = sum(comment, na.rm=TRUE), 
   files = sum(file, na.rm=TRUE))
 
+# order languages by desc number of packages
 pkg_summary = pkg_summary[order(-pkg_summary$pkgs),]
 
+# make counts of code, comments, and blanks per package
 pkg_summary$code = pkg_summary$code / pkg_summary$pkgs
 pkg_summary$blanks = pkg_summary$blanks / pkg_summary$pkgs
 pkg_summary$comments = pkg_summary$comments / pkg_summary$pkgs
 
 library(reshape2)
 
+# convert data frame into structure for grouped bar chart
 melted = melt(pkg_summary[1:10,c("language", "code", "comments", "blanks")], id.vars="language")
 
+# make sure x axis order stays the same (not alphabetized)
 melted$language = factor(melted$language, levels=unique(melted$language))
 
+# make chart!
 chart = melted %>%
   ggplot(aes(x = language, y = value, fill=variable)) +
   geom_col(position="dodge") +
@@ -47,4 +54,5 @@ chart = melted %>%
         legend.title = element_blank(),
         legend.spacing.x = unit(0.25, "cm"))
 
+# show chart if source() is used
 print(chart)
