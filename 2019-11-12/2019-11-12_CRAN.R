@@ -21,6 +21,8 @@ library(reshape2)
 
 melted = melt(pkg_summary[1:10,c("language", "code", "comments", "blanks")], id.vars="language")
 
+melted$language = factor(melted$language, levels=unique(melted$language))
+
 chart = melted %>%
   ggplot(aes(x = language, y = value, fill=variable)) +
   geom_col(position="dodge") +
